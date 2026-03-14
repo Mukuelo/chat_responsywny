@@ -29,7 +29,7 @@ app.get("/", (req, res) => {
 app.post("/chat", async (req, res) => {
   try {
 
-    const { message, style } = req.body;
+    const { messages, style } = req.body;
 
     const systemPrompt = style === "ciepły"
       ? "Odpowiadaj w przyjazny, wspierający sposób."
@@ -44,9 +44,9 @@ app.post("/chat", async (req, res) => {
       body: JSON.stringify({
         model: "gpt-4.1-mini",
         messages: [
-          { role: "system", content: systemPrompt },
-          { role: "user", content: message }
-        ]
+ { role: "system", content: systemPrompt },
+ ...messages
+]
       })
     });
 
