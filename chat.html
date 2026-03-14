@@ -86,6 +86,7 @@ placeholder="Wpisz swoje pytanie..."
 <script>
 
 let conversation = [];
+
 const chat = document.getElementById('chat');
 const inputText = document.getElementById('inputText');
 const sendBtn = document.getElementById('sendBtn');
@@ -94,31 +95,26 @@ const styleSelect = document.getElementById('styleSelect');
 function addMessage(text, className) {
 
 const msg = document.createElement('div');
-
 msg.className = 'message ' + className;
-
 msg.innerText = text;
 
 chat.appendChild(msg);
-
 chat.scrollTop = chat.scrollHeight;
 
 }
 
 
-// pobranie stylu z URL (Qualtrics)
+// pobranie stylu z URL (np. z Qualtrics)
 
 const urlParams = new URLSearchParams(window.location.search);
-
 const forcedStyle = urlParams.get("style");
 
 
-// jeśli styl został przekazany z Qualtrics → ukryj selektor
+// jeśli styl został przekazany → ukryj selektor
 
 if (forcedStyle) {
 
 styleSelect.value = forcedStyle;
-
 styleSelect.style.display = "none";
 
 }
@@ -129,12 +125,6 @@ async function sendToGPT(userText) {
 const style = forcedStyle || styleSelect.value;
 
 try {
-
-const response = await fetch("/chat", {
-
-method: "POST",
-
-headers: { "Content-Type": "application/json" },
 
 conversation.push({
 role: "user",
@@ -165,10 +155,10 @@ content: data.reply
 });
 
 addMessage(data.reply, aiClass);
+
 } catch (error) {
 
 console.error("Błąd połączenia z GPT:", error);
-
 addMessage("Wystąpił błąd w połączeniu z serwerem.", "ai-neutral");
 
 }
@@ -179,7 +169,6 @@ addMessage("Wystąpił błąd w połączeniu z serwerem.", "ai-neutral");
 sendBtn.addEventListener('click', () => {
 
 const userText = inputText.value.trim();
-
 if (!userText) return;
 
 addMessage(userText, 'user');
@@ -198,9 +187,6 @@ if (e.key === 'Enter') sendBtn.click();
 });
 
 </script>
-
-</body>
-</html>
 
 </body>
 </html>
