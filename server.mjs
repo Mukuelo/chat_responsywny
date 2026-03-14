@@ -17,40 +17,47 @@ app.use((req, res, next) => {
 app.use(cors());
 app.use(express.json());
 
-// 🔹 Klucz API z environment variables
 const OPENAI_API_KEY = process.env.OPENAI_API_KEY;
 
-// Serwowanie frontend
+// frontend
 app.get("/", (req, res) => {
   res.sendFile(path.join(__dirname, "chat.html"));
 });
 
-// Endpoint GPT
 app.post("/chat", async (req, res) => {
   try {
 
     const { messages, style } = req.body;
 
-    const systemPrompt = style === "ciepły"
+    const systemPrompt = style === "cieply"
       ? "Odpowiadaj w przyjazny, wspierający sposób."
       : "Odpowiadaj w neutralny, rzeczowy sposób.";
 
     const response = await fetch("https://api.openai.com/v1/chat/completions", {
+
       method: "POST",
+
       headers: {
         "Content-Type": "application/json",
         "Authorization": `Bearer ${OPENAI_API_KEY}`
       },
+
       body: JSON.stringify({
-        model: "gpt-4.1-mini",
+
+        model: "gpt-4o-mini",
+
         messages: [
- { role: "system", content: systemPrompt },
- ...messages
-]
+          { role: "system", content: systemPrompt },
+          ...messages
+        ]
+
       })
+
     });
 
     const data = await response.json();
+
+    console.log("OPENAI RESPONSE:", data);
 
     const reply =
       data?.choices?.[0]?.message?.content ||
@@ -59,12 +66,16 @@ app.post("/chat", async (req, res) => {
     res.json({ reply });
 
   } catch (error) {
+
     console.error("Błąd GPT:", error);
-    res.status(500).json({ reply: "Wystąpił błąd w serwerze GPT." });
+
+    res.status(500).json({
+      reply: "Wystąpił błąd w serwerze GPT."
+    });
+
   }
 });
 
-// 🔹 Port dla hostingu (Render / Railway itd.)
 const PORT = process.env.PORT || 3000;
 
 app.listen(PORT, () => {
