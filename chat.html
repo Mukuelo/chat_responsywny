@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+<meta charset="UTF-8">
+<title>ChatGPT</title>
+
+<style>
+body { font-family: Arial; padding: 20px; background: #f5f5f5; }
+
+#chat {
+border: 1px solid #ccc;
+padding: 10px;
+height: 300px;
+overflow-y: auto;
+background: #fff;
+border-radius: 8px;
+}
+
+.message {
+padding: 8px 12px;
+margin: 5px 0;
+border-radius: 8px;
+max-width: 70%;
+}
+
+.user {
+background: #d1e7dd;
+margin-left: auto;
+}
+
+.ai-neutral {
+background: #f0f0f0;
+}
+
+.ai-warm {
+background: #e0f7fa;
+}
+
+#inputArea {
+margin-top: 10px;
+display: flex;
+gap: 5px;
+}
+
+#inputText {
+flex: 1;
+padding: 8px;
+border-radius: 5px;
+border: 1px solid #ccc;
+}
+
+#sendBtn {
+padding: 8px 12px;
+border: none;
+border-radius: 5px;
+background: #007bff;
+color: #fff;
+cursor: pointer;
+}
+</style>
+</head>
+
+<body>
+
+<h2>ChatGPT</h2>
+
+<div id="chat"></div>
+
+<div id="inputArea">
+
+<input
+type="text"
+id="inputText"
+placeholder="Wpisz swoje pytanie..."
+>
+
+<select id="styleSelect">
+<option value="neutralny">Neutralny</option>
+<option value="cieply">Ciepły</option>
+</select>
+
+<button id="sendBtn">Wyślij</button>
+
+</div>
+
+<script>
+
+const chat = document.getElementById('chat');
+const inputText = document.getElementById('inputText');
+const sendBtn = document.getElementById('sendBtn');
+const styleSelect = document.getElementById('styleSelect');
+
+function addMessage(text, className) {
+
+const msg = document.createElement('div');
+
+msg.className = 'message ' + className;
+
+msg.innerText = text;
+
+chat.appendChild(msg);
+
+chat.scrollTop = chat.scrollHeight;
+
+}
+
+
+// pobranie stylu z URL (Qualtrics)
+
+const urlParams = new URLSearchParams(window.location.search);
+
+const forcedStyle = urlParams.get("style");
+
+
+// jeśli styl został przekazany z Qualtrics → ukryj selektor
+
+if (forcedStyle) {
+
+styleSelect.value = forcedStyle;
+
+styleSelect.style.display = "none";
+
+}
+
+
+async function sendToGPT(userText) {
+
+const style = forcedStyle || styleSelect.value;
+
+try {
+
+const response = await fetch("/chat", {
+
+method: "POST",
+
+headers: { "Content-Type": "application/json" },
+
+body: JSON.stringify({
+
+message: userText,
+
+style: style
+
+})
+
+});
+
+const data = await response.json();
+
+const aiClass = style === 'neutralny'
+? 'ai-neutral'
+: 'ai-warm';
+
+addMessage(data.reply, aiClass);
+
+} catch (error) {
+
+console.error("Błąd połączenia z GPT:", error);
+
+addMessage("Wystąpił błąd w połączeniu z serwerem.", "ai-neutral");
+
+}
+
+}
+
+
+sendBtn.addEventListener('click', () => {
+
+const userText = inputText.value.trim();
+
+if (!userText) return;
+
+addMessage(userText, 'user');
+
+inputText.value = '';
+
+sendToGPT(userText);
+
+});
+
+
+inputText.addEventListener('keydown', (e) => {
+
+if (e.key === 'Enter') sendBtn.click();
+
+});
+
+</script>
+
+</body>
+</html>
+
+</body>
+</html>
